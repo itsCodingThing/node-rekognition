@@ -55,12 +55,22 @@ app.post(
             MaxFaces: 1,
             Image: { Bytes: imageBytes },
         });
+        const detectFacesCommand = new DetectFacesCommand({ Image: { Bytes: imageBytes }, Attributes: ["ALL"] });
 
         try {
-            const { FaceMatches } = await rekognitionClient.send(searchFacesByImageCommand);
-            const faceDetailsDocSnapShot = await imageCollentionRef.doc(FaceMatches[0].Face.ExternalImageId).get();
+            const faceMatches = await rekognitionClient.send(searchFacesByImageCommand);
+            const detectFaces = await rekognitionClient.send(detectFacesCommand);
 
-            res.json({ match: true, name: faceDetailsDocSnapShot.get("Name") });
+            const faceDetailsDocSnapShot = await imageCollentionRef
+                .doc(faceMatches.FaceMatches[0].Face.ExternalImageId)
+                .get();
+
+            res.json({
+                match: true,
+                name: faceDetailsDocSnapShot.data(),
+                faceMatchData: faceMatches,
+                faceDetectData: detectFaces,
+            });
         } catch {
             res.json({ match: false, msg: "no face found" });
         }
