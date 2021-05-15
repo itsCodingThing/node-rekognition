@@ -2,7 +2,7 @@ import express from "express";
 import asyncHandler from "express-async-handler";
 import cors from "cors";
 import morgan from "morgan";
-import { IndexFacesCommand, SearchFacesByImageCommand } from "@aws-sdk/client-rekognition";
+import { IndexFacesCommand, SearchFacesByImageCommand, DetectFacesCommand } from "@aws-sdk/client-rekognition";
 
 import { rekognitionClient, COLLECTION_ID } from "./utils/api/rekognition/rekognition.js";
 import { firestoreDB } from "./utils/api/firebase/fire.js";
@@ -63,6 +63,22 @@ app.post(
             res.json({ match: true, name: faceDetailsDocSnapShot.get("Name") });
         } catch {
             res.json({ match: false, msg: "no face found" });
+        }
+    })
+);
+
+app.post(
+    "/detectFaces",
+    asyncHandler(async (req, res) => {
+        const imageBytes = Buffer.from(req.body.image, "base64");
+
+        const detectFacesCommand = new DetectFacesCommand({ Image: { Bytes: imageBytes }, Attributes: ["ALL"] });
+
+        try {
+            const faces = await rekognitionClient.send(detectFacesCommand);
+            res.json({ ...faces });
+        } catch (err) {
+            res.json({ msg: "no faces found in the image" });
         }
     })
 );
