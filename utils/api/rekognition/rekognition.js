@@ -3,8 +3,8 @@ import { RekognitionClient, CreateCollectionCommand, DeleteCollectionCommand } f
 const client = new RekognitionClient({
     region: "ap-south-1",
     credentials: {
-        accessKeyId: "AKIAX7RF22LFG3IJVBIF",
-        secretAccessKey: "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",
+        accessKeyId: "aws access key id needed",
+        secretAccessKey: "aws secret access key needed",
     },
 });
 
